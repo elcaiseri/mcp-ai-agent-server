@@ -1,9 +1,11 @@
 """LangChain AI Agent for intelligent task execution."""
 from typing import Dict, Any, Optional, List
+
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from langchain.tools import tool
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
+
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
@@ -16,6 +18,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeEl
 from rich.syntax import Syntax
 from rich import box
 from rich.align import Align
+
 from datetime import datetime
 import json
 from pathlib import Path
@@ -60,7 +63,22 @@ class AIAgent:
         if "get_weather" in self.tools_dict:
             @tool(
                 "weather_tool",
-                description="Get current weather information for a specific location. Input should be a location string (city, state/country).",
+                description="""Get current weather information for any location worldwide.
+                
+                This tool provides real-time weather data including temperature, conditions, humidity, and wind speed.
+                
+                Input format: A location string (e.g., "New York", "London, UK", "Tokyo, Japan")
+                
+                Best practices:
+                - Be specific with location names (include state/country for clarity)
+                - Use well-known city names for better accuracy
+                - Works with major cities and landmarks globally
+                
+                Examples:
+                - "San Francisco, CA"
+                - "Paris, France"
+                - "Sydney, Australia"
+                """,
             )
             async def get_weather(location: str) -> str:
                 return await self.tools_dict["get_weather"](location)
@@ -70,7 +88,26 @@ class AIAgent:
         if "fetch_news" in self.tools_dict:
             @tool(
                 "news_tool",
-                description="Useful for getting the latest news headlines about a specific topic or person. Input should be a single string representing the topic or person's name.",
+                description="""Fetch the latest news headlines and articles about any topic, person, company, or event.
+                
+                This tool searches recent news from multiple trusted sources worldwide.
+                
+                Input parameters:
+                - topic (required): The subject to search for (person, company, event, technology, etc.)
+                - limit (optional, default=10): Number of articles to retrieve (1-100)
+                - language (optional, default="en"): Language code (en, es, fr, de, etc.)
+                
+                Best practices:
+                - Use specific keywords for better results (e.g., "Tesla stock" vs "Tesla")
+                - For people, use full names (e.g., "Elon Musk")
+                - Combine terms for focused results (e.g., "AI regulation Europe")
+                - Recent news is typically within the last 24-48 hours
+                
+                Examples:
+                - "artificial intelligence breakthroughs"
+                - "climate change summit"
+                - "Apple iPhone launch"
+                """,
             )
             async def fetch_news(topic: str, limit: int = 10, language: str = "en") -> str:
                 return await self.tools_dict["fetch_news"](topic, limit, language)
@@ -80,7 +117,25 @@ class AIAgent:
         if "create_file" in self.tools_dict:
             @tool(
                 "file_create_tool",
-                description="Create a new file with specified content. Input should be filename and content.",
+                description="""Create a new file with specified content in the file system.
+                
+                This tool allows you to create text files, code files, configuration files, and more.
+                
+                Input parameters:
+                - filename (required): Name or path of the file to create (e.g., "report.txt", "code/script.py")
+                - content (required): The actual content to write to the file
+                
+                Best practices:
+                - Include file extensions for proper formatting (.txt, .py, .json, .md, etc.)
+                - Use relative paths or specify full directory structure
+                - Overwrites existing files - use read_file first to check if file exists
+                - Supports multi-line content and special characters
+                
+                Examples:
+                - filename: "notes.txt", content: "Meeting notes from today"
+                - filename: "config.json", content: '{"debug": true}'
+                - filename: "scripts/hello.py", content: 'print("Hello, World!")'
+                """,
             )
             async def create_file(filename: str, content: str) -> str:
                 return await self.tools_dict["create_file"](filename, content)
@@ -89,7 +144,24 @@ class AIAgent:
         if "read_file" in self.tools_dict:
             @tool(
                 "file_read_tool", 
-                description="Read content from an existing file. Input should be the filename.",
+                description="""Read and retrieve content from an existing file in the file system.
+                
+                This tool reads text files, code files, logs, and other readable formats.
+                
+                Input parameter:
+                - filename (required): Name or path of the file to read
+                
+                Best practices:
+                - Verify file exists before reading
+                - Works best with text-based files (.txt, .py, .json, .md, .log, etc.)
+                - Returns full file content (be mindful of large files)
+                - Use relative paths from current directory or full paths
+                
+                Examples:
+                - "config.json"
+                - "logs/app.log"
+                - "../readme.md"
+                """,
             )
             async def read_file(filename: str) -> str:
                 return await self.tools_dict["read_file"](filename)
@@ -98,7 +170,23 @@ class AIAgent:
         if "delete_file" in self.tools_dict:
             @tool(
                 "file_delete_tool",
-                description="Delete an existing file. Input should be the filename.",
+                description="""Permanently delete a file from the file system.
+                
+                ⚠️ WARNING: This operation cannot be undone!
+                
+                Input parameter:
+                - filename (required): Name or path of the file to delete
+                
+                Best practices:
+                - Always confirm with user before deleting important files
+                - Use read_file first to verify you're deleting the correct file
+                - Cannot delete directories (only individual files)
+                - Returns error if file doesn't exist
+                
+                Examples:
+                - "temp.txt"
+                - "old_logs/debug.log"
+                """,
             )
             async def delete_file(filename: str) -> str:
                 return await self.tools_dict["delete_file"](filename)
@@ -107,7 +195,28 @@ class AIAgent:
         if "search_files" in self.tools_dict:
             @tool(
                 "file_search_tool",
-                description="Search for files in directories. Input should be search parameters.",
+                description="""Search for files matching a pattern in the file system.
+                
+                This tool finds files based on name patterns, extensions, or wildcards.
+                
+                Input parameter:
+                - pattern (required): Search pattern or filename (supports wildcards)
+                
+                Pattern syntax:
+                - "*" matches any characters (e.g., "*.py" finds all Python files)
+                - "?" matches single character (e.g., "file?.txt")
+                - Exact names work too (e.g., "config.json")
+                
+                Best practices:
+                - Use wildcards for flexible searching
+                - Searches recursively in subdirectories
+                - Case-sensitive on Unix systems
+                
+                Examples:
+                - "*.py" (all Python files)
+                - "test_*.json" (test JSON files)
+                - "README*" (README files)
+                """,
             )
             async def search_files(pattern: str) -> str:
                 return await self.tools_dict["search_files"](pattern)
@@ -116,7 +225,24 @@ class AIAgent:
         if "list_directory" in self.tools_dict:
             @tool(
                 "list_directory_tool",
-                description="List contents of a directory. Input should be directory path.",
+                description="""List all files and subdirectories in a specified directory.
+                
+                This tool provides a directory listing with file information.
+                
+                Input parameter:
+                - path (optional, default="."): Directory path to list
+                
+                Best practices:
+                - Use "." for current directory
+                - Use ".." for parent directory
+                - Provide relative or absolute paths
+                - Shows both files and subdirectories
+                
+                Examples:
+                - "." (current directory)
+                - "src/components"
+                - "../data"
+                """,
             )
             async def list_directory(path: str = ".") -> str:
                 return await self.tools_dict["list_directory"](path)
@@ -126,7 +252,30 @@ class AIAgent:
         if "fetch_webpage" in self.tools_dict:
             @tool(
                 "web_fetch_tool",
-                description="Fetch content from a webpage. Input should be a valid URL.",
+                description="""Fetch and extract content from any webpage on the internet.
+                
+                This tool retrieves webpage content, extracts text, and removes HTML formatting.
+                
+                Input parameter:
+                - url (required): Valid HTTP/HTTPS URL to fetch
+                
+                Capabilities:
+                - Extracts main text content from webpages
+                - Removes HTML tags and scripts
+                - Handles most modern websites
+                - Follows redirects automatically
+                
+                Best practices:
+                - Use complete URLs including http:// or https://
+                - Works best with article pages, documentation, and content-heavy sites
+                - May not work with heavily JavaScript-dependent sites
+                - Respects robots.txt and rate limits
+                
+                Examples:
+                - "https://example.com/article"
+                - "https://en.wikipedia.org/wiki/Python_(programming_language)"
+                - "https://docs.python.org/3/"
+                """,
             )
             async def fetch_webpage(url: str) -> str:
                 return await self.tools_dict["fetch_webpage"](url)
@@ -136,7 +285,30 @@ class AIAgent:
         if "calculate" in self.tools_dict:
             @tool(
                 "calculator_tool",
-                description="Perform mathematical calculations. Input should be a mathematical expression as a string.",
+                description="""Perform mathematical calculations and evaluate expressions.
+                
+                This tool handles arithmetic, algebra, trigonometry, and complex mathematical operations.
+                
+                Input parameter:
+                - expression (required): Mathematical expression as a string
+                
+                Supported operations:
+                - Basic: +, -, *, /, ** (power), % (modulo)
+                - Functions: sqrt, sin, cos, tan, log, ln, abs, round
+                - Constants: pi, e
+                - Parentheses for grouping
+                
+                Best practices:
+                - Use standard mathematical notation
+                - Include spaces for readability
+                - Use parentheses to clarify order of operations
+                
+                Examples:
+                - "2 + 2 * 3"
+                - "sqrt(144)"
+                - "sin(pi/2)"
+                - "(100 - 32) * 5/9" (Fahrenheit to Celsius)
+                """,
             )
             def calculate(expression: str) -> str:
                 return self.tools_dict["calculate"](expression)
@@ -145,7 +317,36 @@ class AIAgent:
         if "convert_units" in self.tools_dict:
             @tool(
                 "unit_converter_tool",
-                description="Convert between different units. Supported conversions: Temperature (celsius, fahrenheit, kelvin), Length (meter, kilometer, mile, foot, inch), Weight (kilogram, gram, pound, ounce). Input format: value (float), from_unit (str), to_unit (str).",
+                description="""Convert values between different units of measurement.
+                
+                This tool supports temperature, length, and weight conversions.
+                
+                Input parameters:
+                - value (required): Numeric value to convert (float)
+                - from_unit (required): Source unit name (case-insensitive)
+                - to_unit (required): Target unit name (case-insensitive)
+                
+                Supported conversions:
+                
+                Temperature:
+                - celsius, fahrenheit, kelvin
+                
+                Length:
+                - meter, kilometer, mile, foot, inch, centimeter, millimeter
+                
+                Weight/Mass:
+                - kilogram, gram, pound, ounce, ton, milligram
+                
+                Best practices:
+                - Use full unit names (not abbreviations)
+                - Case doesn't matter (Celsius = celsius = CELSIUS)
+                - Decimal values are supported
+                
+                Examples:
+                - value: 100, from_unit: "celsius", to_unit: "fahrenheit"
+                - value: 5.5, from_unit: "kilometer", to_unit: "mile"
+                - value: 150, from_unit: "pound", to_unit: "kilogram"
+                """,
             )
             async def convert_units(value: float, from_unit: str, to_unit: str) -> str:
                 return await self.tools_dict["convert_units"](value, from_unit, to_unit)
@@ -171,13 +372,46 @@ class AIAgent:
 
             assert len(tools) == len(self.tools_dict), "Mismatch in number of tools created."
             
+            # Enhanced system prompt
+            system_prompt = """You are an intelligent AI assistant specialized in helping users with a variety of tasks.
+
+Your capabilities include:
+- 📰 Fetching and summarizing latest news on any topic
+- 🌤️ Providing real-time weather information for any location
+- 📁 Managing files (create, read, delete, search, list directories)
+- 🌐 Fetching and extracting content from webpages
+- 🧮 Performing mathematical calculations and unit conversions
+
+Core Principles:
+1. **Tool Usage**: Always use the appropriate tools to complete tasks. Don't make up information - use tools to get real data.
+2. **Clarity**: Provide clear, concise, and well-structured responses. Use bullet points and formatting when appropriate.
+3. **Accuracy**: Verify information using tools before presenting it to users.
+4. **Helpfulness**: If a task requires multiple steps, explain what you're doing and why.
+5. **Safety**: For destructive operations (like deleting files), acknowledge the action and its consequences.
+6. **Error Handling**: If something goes wrong, explain the issue clearly and suggest alternatives.
+
+Response Style:
+- Be professional yet friendly and conversational
+- Use emojis sparingly for visual clarity (✓, ⚠️, 📊, etc.)
+- Format data in readable structures (tables, lists, sections)
+- Provide context and explanations, not just raw data
+- Anticipate follow-up questions and provide relevant additional information
+
+When using tools:
+- Choose the most appropriate tool for each task
+- Parse tool outputs and present them in a user-friendly format
+- If a tool fails, explain why and suggest alternatives
+- Combine multiple tools when needed to complete complex tasks
+
+Remember: You're here to make users' tasks easier and more efficient. Be proactive, thorough, and reliable."""
+            
             # Create agent
             self.agent = create_agent(
                 model=self.llm,
                 tools=tools,
                 debug=False,
                 name="AI Agent",
-                system_prompt="You're an AI agent that helps users fetch news, weather updates, manage files, fetch web content, and perform calculations efficiently. Always use the appropriate tools to complete tasks. Be concise but thorough in your responses."
+                system_prompt=system_prompt
             )
             
         except Exception as e:
@@ -205,7 +439,7 @@ class AIAgent:
                 "user_input": user_input,
                 "response": None,
                 "history": history or [],
-                "error": "AI Agent not initialized. Please set OPENAI_API_KEY.",
+                "error": "⚠️ AI Agent not initialized. Please set OPENAI_API_KEY in your environment variables or .env file.",
                 "tokens": 0
             }
         
@@ -244,12 +478,20 @@ class AIAgent:
                 "tokens": tokens_used
             }
         except Exception as e:
+            error_msg = f"❌ Error in conversation: {str(e)}"
+            if "rate_limit" in str(e).lower():
+                error_msg += "\n\n💡 Tip: You've hit the rate limit. Please wait a moment and try again."
+            elif "api_key" in str(e).lower():
+                error_msg += "\n\n💡 Tip: Check your OPENAI_API_KEY configuration."
+            elif "timeout" in str(e).lower():
+                error_msg += "\n\n💡 Tip: The request timed out. Try a simpler query or check your connection."
+            
             return {
                 "success": False,
                 "user_input": user_input,
                 "response": None,
                 "history": history or [],
-                "error": f"Error in conversation: {str(e)}",
+                "error": error_msg,
                 "tokens": 0
             }
     
