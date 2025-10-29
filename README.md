@@ -31,8 +31,8 @@ A real-world Model Context Protocol (MCP) server powered by LangChain that enabl
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
-cd mcp
+git clone https://github.com/elcaiseri/mcp-ai-agent-server.git
+cd mcp-ai-agent-server
 ```
 
 2. Install dependencies using uv:
@@ -73,7 +73,7 @@ Add to your MCP client configuration:
     "ai-agent": {
       "command": "uv",
       "args": ["run", "python", "-m", "src.server"],
-      "cwd": "/path/to/mcp"
+      "cwd": "/path/to/mcp-ai-agent-server"
     }
   }
 }
@@ -120,7 +120,7 @@ execute_agent_task(task="Analyze the weather in Tokyo and write a report")
 ## Architecture
 
 ```
-mcp/
+mcp-ai-agent-server/
 ├── src/
 │   ├── server.py          # Main MCP server implementation
 │   ├── tools/             # Individual tool implementations
@@ -158,3 +158,7 @@ MIT License
 ## Contributing
 
 Contributions welcome! Please feel free to submit a Pull Request.
+
+## Repository
+
+GitHub: [https://github.com/elcaiseri/mcp-ai-agent-server](https://github.com/elcaiseri/mcp-ai-agent-server)
