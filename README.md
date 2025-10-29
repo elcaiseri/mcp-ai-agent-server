@@ -1,6 +1,16 @@
 # MCP AI Agent Server
 
-A real-world Model Context Protocol (MCP) server powered by LangChain that enables AI agents to perform actual tasks including:
+A dual-mode AI agent system that combines the Model Context Protocol (MCP) server capabilities with a standalone CLI agent, powered by LangChain.
+
+## 🎯 Two Modes of Operation
+
+### 1. **MCP Server Mode** 
+Run as an MCP server that can be connected to any MCP client (like Claude Desktop) or inspected using the MCP Inspector.
+
+### 2. **CLI Agent Mode**
+Run as a standalone command-line agent for direct interaction and task execution.
+
+## ✨ Capabilities
 
 - 🌐 **API Interactions**: Fetch weather data, news articles, and more
 - 📁 **File Management**: Read, write, search, and organize files
@@ -8,9 +18,7 @@ A real-world Model Context Protocol (MCP) server powered by LangChain that enabl
 - 📊 **Data Processing**: Analyze and transform data
 - 💡 **AI-Powered Tasks**: Use LangChain for intelligent decision-making
 
-## Features
-
-### Tools Available
+## 🛠️ Tools Available
 
 1. **Weather Tool**: Get current weather for any location
 2. **News Tool**: Fetch latest news articles by topic
@@ -20,12 +28,13 @@ A real-world Model Context Protocol (MCP) server powered by LangChain that enabl
 6. **Search Tool**: Search files and data
 7. **AI Agent**: LangChain-powered reasoning and task execution
 
-## Installation
+## 📦 Installation
 
 ### Prerequisites
 
 - Python 3.10+
 - [uv](https://github.com/astral-sh/uv) package manager
+- Node.js (for MCP Inspector)
 
 ### Setup
 
@@ -46,26 +55,33 @@ cp .env.example .env
 # Edit .env with your API keys
 ```
 
-4. Run the server:
-```bash
-uv run python -m src.server
+Required API keys in `.env`:
+```env
+OPENAI_API_KEY=your_openai_api_key
+OPENWEATHER_API_KEY=your_openweather_api_key
+NEWS_API_KEY=your_news_api_key
 ```
 
-## Configuration
+## 🚀 Usage
 
-Edit `.env` file with your API keys:
+### Mode 1: MCP Server with Inspector
 
-- `OPENAI_API_KEY`: OpenAI API key for LangChain
-- `OPENWEATHER_API_KEY`: OpenWeatherMap API key
-- `NEWS_API_KEY`: News API key
+The MCP server can be tested and debugged using the official MCP Inspector tool.
 
-## Usage
+**Start the server with inspector:**
+```bash
+npx @modelcontextprotocol/inspector uv run python -m src.server
+```
 
-### As MCP Server
+This will:
+- Launch the MCP server
+- Open the MCP Inspector in your browser
+- Allow you to test all available tools interactively
+- View request/response logs in real-time
 
-The server implements the Model Context Protocol and can be connected to any MCP client (like Claude Desktop).
+**Connect to MCP Clients:**
 
-Add to your MCP client configuration:
+Add to your MCP client configuration (e.g., Claude Desktop):
 
 ```json
 {
@@ -79,21 +95,46 @@ Add to your MCP client configuration:
 }
 ```
 
-### Available Tools
+### Mode 2: Standalone CLI Agent
 
-#### 1. Get Weather
+Run the agent directly from the command line for interactive sessions.
+
+**Start the CLI agent:**
+```bash
+uv run python -m src.agent
+```
+
+**Example interactions:**
+```
+> What's the weather in Tokyo?
+> Fetch the latest news about AI
+> Create a file called notes.txt with today's summary
+> Search for all Python files in the current directory
+```
+
+The CLI agent uses LangChain to:
+- Understand natural language commands
+- Select appropriate tools automatically
+- Chain multiple operations together
+- Provide conversational responses
+
+## 📚 Tool Examples
+
+### Weather Tool
 ```python
 # Get current weather for a location
 get_weather(location="New York")
+# Returns: temperature, conditions, humidity, wind speed
 ```
 
-#### 2. Fetch News
+### News Tool
 ```python
 # Get latest news on a topic
 fetch_news(topic="technology", limit=5)
+# Returns: list of articles with title, description, URL
 ```
 
-#### 3. File Operations
+### File Operations
 ```python
 # Create a file
 create_file(path="data/output.txt", content="Hello World")
@@ -105,19 +146,20 @@ read_file(path="data/input.txt")
 search_files(directory=".", pattern="*.py")
 ```
 
-#### 4. Web Fetching
+### Web Fetching
 ```python
 # Fetch webpage content
 fetch_webpage(url="https://example.com")
+# Returns: parsed HTML content and text
 ```
 
-#### 5. AI Agent Tasks
+### AI Agent Tasks
 ```python
-# Execute complex tasks using LangChain
+# Execute complex multi-step tasks
 execute_agent_task(task="Analyze the weather in Tokyo and write a report")
 ```
 
-## Architecture
+## 🏗️ Architecture
 
 ```
 mcp-ai-agent-server/
@@ -135,10 +177,11 @@ mcp-ai-agent-server/
 │       └── config.py
 ├── tests/                 # Test suite
 ├── pyproject.toml         # Project configuration
+├── .env.example           # Environment template
 └── README.md
 ```
 
-## Development
+## 🔧 Development
 
 ### Running Tests
 ```bash
@@ -155,10 +198,6 @@ uv run ruff check src/
 
 MIT License
 
-## Contributing
+## 🤝 Contributing
 
 Contributions welcome! Please feel free to submit a Pull Request.
-
-## Repository
-
-GitHub: [https://github.com/elcaiseri/mcp-ai-agent-server](https://github.com/elcaiseri/mcp-ai-agent-server)
