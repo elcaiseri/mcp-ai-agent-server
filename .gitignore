@@ -52,3 +52,5 @@ htmlcov/
 # MCP specific
 #mcp_data/
 #temp_files/
+
+.DS_Store
