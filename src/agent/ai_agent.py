@@ -31,6 +31,7 @@ from ..tools.weather import weather_tool
 from ..tools.file_manager import file_manager
 from ..tools.web_fetcher import web_fetcher
 from ..tools.calculator import calculator
+from ..tools.cli import cli_utils
 
 class AIAgent:
     """AI Agent powered by LangChain and OpenAI."""
@@ -353,8 +354,36 @@ class AIAgent:
             async def convert_units(value: float, from_unit: str, to_unit: str) -> str:
                 return await self.tools_dict["convert_units"](value, from_unit, to_unit)
             tools.append(convert_units)
-
         
+        if "cli_utils" in self.tools_dict:
+            @tool(
+                "cli_utils",
+                description="""Execute any shell command with full freedom.
+                
+                This tool allows running arbitrary shell commands in a controlled environment.
+                
+                Input parameters:
+                - command (required): Command to execute (any valid shell command)
+                - cwd (optional): Working directory (defaults to data directory)
+                - timeout (optional): Command timeout in seconds
+                
+                Best practices:
+                - Ensure commands are safe and non-destructive
+                - Use absolute or relative paths for file operations
+                - Monitor command output for errors
+                - Use timeout to prevent hanging commands
+                
+                Examples:
+                - command: "ls -la", cwd: "/home/user/docs"
+                - command: "cat /etc/hosts"
+                - command: "ping -c 4 example.com", timeout: 10
+                """,
+            )
+            async def cli_utils(command: str, cwd: Optional[str] = None, timeout: Optional[int] = None) -> str:
+                return await self.tools_dict["cli_utils"](command, cwd, timeout)
+            tools.append(cli_utils)
+
+
         return tools
     
     def _initialize_agent(self):
@@ -383,6 +412,7 @@ Your capabilities include:
 - 📁 Managing files (create, read, delete, search, list directories)
 - 🌐 Fetching and extracting content from webpages
 - 🧮 Performing mathematical calculations and unit conversions
+- 💻 Executing shell commands and CLI operations
 
 Core Principles:
 1. **Tool Usage**: Always use the appropriate tools to complete tasks. Don't make up information - use tools to get real data.
@@ -405,7 +435,22 @@ When using tools:
 - If a tool fails, explain why and suggest alternatives
 - Combine multiple tools when needed to complete complex tasks
 
-Remember: You're here to make users' tasks easier and more efficient. Be proactive, thorough, and reliable."""
+**CRITICAL - CLI Tool Usage**:
+Before performing ANY operations (file operations, installations, configurations, etc.), you MUST:
+1. **Scan the environment first** - Use `cli_utils` to run commands like `ls -la`, `pwd`, `cat`, `find` to understand what exists
+2. **Understand the context** - Check directory structure, existing files, permissions, and current state
+3. **Verify prerequisites** - Confirm required tools, dependencies, or files are present
+4. **Plan before execution** - Explain what you found and what you'll do next
+
+Examples of proactive scanning:
+- Before creating files: Check if directory exists with `ls -la` or `pwd`
+- Before installing: Check if already installed with `which <tool>` or `<tool> --version`
+- Before modifying: Read existing content with `cat` or examine with `ls`
+- Before running scripts: Verify file exists and check permissions with `ls -l`
+
+This reconnaissance approach prevents errors, avoids conflicts, and ensures safe, informed operations.
+
+Remember: You're here to make users' tasks easier and more efficient. Be proactive, thorough, and reliable. Always scan before you act!"""
             
             # Create agent
             self.agent = create_agent(
@@ -966,6 +1011,9 @@ async def main():
         # Calculator tools
         "calculate": calculator.calculate,
         "convert_units": calculator.convert_units,
+
+        # CLI utilities
+        "cli_utils": cli_utils.execute,
     }
 
     agent = AIAgent(tools_dict)

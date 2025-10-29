@@ -12,6 +12,7 @@ from .tools.news import news_tool
 from .tools.file_manager import file_manager
 from .tools.web_fetcher import web_fetcher
 from .tools.calculator import calculator
+from .tools.cli import cli_utils
 from .utils.config import config
 
 # Initialize MCP server
@@ -191,6 +192,29 @@ async def list_tools() -> list[Tool]:
                 "required": ["value", "from_unit", "to_unit"]
             }
         ),
+        Tool(
+            name="cli_utils",
+            description="Execute shell commands asynchronously with timeout and working directory options",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "Shell command to execute"
+                    },
+                    "cwd": {
+                        "type": "string",
+                        "description": "Working directory for command execution (optional)",
+                        "default": "."
+                    },
+                    "timeout": {
+                        "type": "integer",
+                        "description": "Command timeout in seconds (optional)"
+                    }
+                },
+                "required": ["command"]
+            }
+        ),
     ]
 
 # Tool routing dictionary
@@ -214,6 +238,9 @@ tool2call = {
     # Calculator tools
     "calculate": calculator.calculate,
     "convert_units": calculator.convert_units,
+
+    # CLI utilities
+    "cli_utils": cli_utils.execute,
 }
 
 @app.call_tool()
