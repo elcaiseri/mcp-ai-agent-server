@@ -104,6 +104,10 @@ Run the agent directly from the command line for interactive sessions.
 uv run python -m src.agent
 ```
 
+<p align="center">
+  <img src="assets/agent_cli.png" alt="AI Agent Chat Interface" width="600">
+</p>
+
 **Example interactions:**
 ```
 > What's the weather in Tokyo?
