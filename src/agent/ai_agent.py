@@ -22,6 +22,8 @@ from rich.align import Align
 from datetime import datetime
 import json
 from pathlib import Path
+
+from src import agent
 from ..utils.config import config
 
 from ..tools.news import news_tool
@@ -970,27 +972,6 @@ async def main():
     await agent.chat()
 
 if __name__ == "__main__":
-    tools_dict = {
-        # Weather tools
-        "get_weather": weather_tool.get_weather,
-        
-        # News tools
-        "fetch_news": news_tool.fetch_news,
-        
-        # File management tools
-        "create_file": file_manager.create_file,
-        "read_file": file_manager.read_file,
-        "delete_file": file_manager.delete_file,
-        "search_files": file_manager.search_files,
-        "list_directory": file_manager.list_directory,
-        
-        # Web tools
-        "fetch_webpage": web_fetcher.fetch_webpage,
-    }
-
-    agent = AIAgent(tools_dict)
-
-    if agent.is_available():
-        import asyncio
-        asyncio.run(agent.chat())
+    import asyncio
+    asyncio.run(main())
 
