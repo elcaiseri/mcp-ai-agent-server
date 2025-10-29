@@ -130,7 +130,7 @@ class FileManagerTool:
                 "error": f"Error deleting file: {str(e)}"
             }
     
-    def search_files(
+    async def search_files(
         self, 
         directory: str = ".", 
         pattern: str = "*"
