@@ -14,45 +14,9 @@ from .tools.web_fetcher import web_fetcher
 from .tools.calculator import calculator
 from .utils.config import config
 
-# Import LangChain components
-from langchain_core.tools import Tool as LangChainTool
-from .agent.ai_agent import AIAgent
-
 # Initialize MCP server
 app = Server("ai-agent-server")
 print("MCP AI Agent Server initialized...")
-
-# Initialize LangChain tools for the AI agent
-langchain_tools = [
-    LangChainTool(
-        name="get_weather",
-        func=lambda location: asyncio.run(weather_tool.get_weather(location)),
-        description="Get current weather for a location. Input: location name (e.g., 'New York' or 'London, UK')"
-    ),
-    LangChainTool(
-        name="fetch_news",
-        func=lambda topic: asyncio.run(news_tool.fetch_news(topic, limit=5)),
-        description="Fetch recent news articles on a topic. Input: topic/keyword to search for"
-    ),
-    LangChainTool(
-        name="read_file",
-        func=lambda path: asyncio.run(file_manager.read_file(path)),
-        description="Read content from a file. Input: file path"
-    ),
-    LangChainTool(
-        name="fetch_webpage",
-        func=lambda url: asyncio.run(web_fetcher.fetch_webpage(url)),
-        description="Fetch and extract text content from a webpage. Input: URL"
-    ),
-    LangChainTool(
-        name="calculate",
-        func=lambda expr: calculator.calculate(expr),
-        description="Perform mathematical calculations. Input: mathematical expression (e.g., '2+2', 'sqrt(16)')"
-    ),
-]
-
-# Initialize AI agent
-ai_agent = AIAgent(langchain_tools)
 
 @app.list_tools()
 async def list_tools() -> list[Tool]:
@@ -227,100 +191,56 @@ async def list_tools() -> list[Tool]:
                 "required": ["value", "from_unit", "to_unit"]
             }
         ),
-        Tool(
-            name="execute_agent_task",
-            description="Execute a complex task using AI agent with access to all tools. Use this for multi-step tasks that require reasoning.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "task": {
-                        "type": "string",
-                        "description": "Task description in natural language"
-                    }
-                },
-                "required": ["task"]
-            }
-        ),
     ]
+
+# Tool routing dictionary
+tool2call = {
+    # Weather tools
+    "get_weather": weather_tool.get_weather,
+    
+    # News tools
+    "fetch_news": news_tool.fetch_news,
+    
+    # File management tools
+    "create_file": file_manager.create_file,
+    "read_file": file_manager.read_file,
+    "delete_file": file_manager.delete_file,
+    "search_files": file_manager.search_files,
+    "list_directory": file_manager.list_directory,
+    
+    # Web tools
+    "fetch_webpage": web_fetcher.fetch_webpage,
+    
+    # Calculator tools
+    "calculate": calculator.calculate,
+    "convert_units": calculator.convert_units,
+}
 
 @app.call_tool()
 async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
     """Handle tool execution."""
     
     try:
-        # Route to appropriate tool
-        if name == "get_weather":
-            result = await weather_tool.get_weather(arguments["location"])
-        
-        elif name == "fetch_news":
-            result = await news_tool.fetch_news(
-                arguments["topic"],
-                arguments.get("limit", 5)
-            )
-        
-        elif name == "create_file":
-            result = await file_manager.create_file(
-                arguments["path"],
-                arguments["content"]
-            )
-        
-        elif name == "read_file":
-            result = await file_manager.read_file(arguments["path"])
-        
-        elif name == "delete_file":
-            result = await file_manager.delete_file(arguments["path"])
-        
-        elif name == "search_files":
-            result = file_manager.search_files(
-                arguments.get("directory", "."),
-                arguments.get("pattern", "*")
-            )
-        
-        elif name == "list_directory":
-            result = await file_manager.list_directory(
-                arguments.get("directory", ".")
-            )
-        
-        elif name == "fetch_webpage":
-            result = await web_fetcher.fetch_webpage(
-                arguments["url"],
-                arguments.get("extract_text", True)
-            )
-        
-        elif name == "calculate":
-            result = calculator.calculate(arguments["expression"])
-        
-        elif name == "convert_units":
-            result = calculator.convert_units(
-                arguments["value"],
-                arguments["from_unit"],
-                arguments["to_unit"]
-            )
-        
-        elif name == "execute_agent_task":
-            if not ai_agent.is_available():
-                result = {
-                    "error": "AI Agent not available. Please configure OPENAI_API_KEY."
-                }
-            else:
-                result = await ai_agent.execute_task(arguments["task"])
-        
+        if name in tool2call:
+            result = await tool2call[name](**arguments)
         else:
             result = {"error": f"Unknown tool: {name}"}
         
         # Format result as JSON
-        return [TextContent(
-            type="text",
-            text=json.dumps(result, indent=2, default=str)
-        )]
-    
+        return [
+            TextContent(
+                type="text",
+                text=json.dumps(result, indent=2, default=str)
+            )
+        ]
+
     except Exception as e:
-        return [TextContent(
-            type="text",
-            text=json.dumps({
-                "error": f"Error executing {name}: {str(e)}"
-            }, indent=2)
-        )]
+        return [
+            TextContent(
+                type="text",
+                text=json.dumps({"error": f"Error executing {name}: {str(e)}"}, indent=2)
+            )
+        ]
 
 async def main():
     """Run the MCP server."""
