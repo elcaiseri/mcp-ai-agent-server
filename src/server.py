@@ -1,5 +1,6 @@
 """Main MCP server implementation."""
 import json
+import logging
 from typing import Any, Sequence
 from fastapi import FastAPI
 from mcp.server import Server
@@ -14,6 +15,13 @@ from .tools.calculator import calculator
 from .tools.cli import cli_utils
 from .utils.helper import func_to_tool
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # Initialize MCP server
 class MCPServer:
     """MCP AI Agent Server."""
@@ -22,14 +30,14 @@ class MCPServer:
         self.tool2call = tool2call
 
         self.setup_tools()
-        print("MCP AI Agent Server initialized...")
+        logger.info("MCP AI Agent Server initialized with %d tools", len(tool2call))
 
     def setup_tools(self):
         """Register tools with the MCP server."""
         @self.server.list_tools()
         async def list_tools() -> list[Tool]:
             """List all available tools."""
-
+            logger.debug("Listing available tools")
             return [
                 Tool(
                     **func_to_tool(func, name)
@@ -39,10 +47,13 @@ class MCPServer:
         @self.server.call_tool()
         async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
             """Handle tool execution."""
+            logger.info("Executing tool: %s with arguments: %s", name, arguments)
             try:
                 if name in self.tool2call:
                     result = await self.tool2call[name](**arguments)
+                    logger.info("Tool %s executed successfully", name)
                 else:
+                    logger.error("Unknown tool requested: %s", name)
                     result = {"error": f"Unknown tool: {name}"}
 
                 # Format result as JSON
@@ -54,6 +65,7 @@ class MCPServer:
                 ]
 
             except Exception as e:
+                logger.exception("Error executing tool %s: %s", name, str(e))
                 return [
                     TextContent(
                         type="text",
@@ -66,6 +78,7 @@ async def stdio_run(mcp):
     """Run the MCP server with stdio."""
     from mcp.server.stdio import stdio_server
     
+    logger.info("Starting MCP server with stdio transport")
     async with stdio_server() as (read_stream, write_stream):
         await mcp.run(
             read_stream,
@@ -75,6 +88,7 @@ async def stdio_run(mcp):
 
 def sse_run(mcp):
     """Run the MCP server with SSE."""
+    logger.info("Initializing MCP server with SSE transport")
     app = FastAPI(title="MCP AI Agent ASGI Server")
 
     from .utils.sse_utils import sse_server
@@ -82,6 +96,7 @@ def sse_run(mcp):
 
     @app.get("/health")
     async def health():
+        logger.debug("Health check requested")
         return {"status": "MCP HEALTHY"}
 
     return app
@@ -117,6 +132,7 @@ if __name__ == "__main__":
     
     from .utils.config import config
 
+    logger.info("Starting MCP AI Agent Server")
     config.ensure_directories() # Ensure directories exist
     config.validate() # Validate configuration
     
@@ -125,10 +141,12 @@ if __name__ == "__main__":
     import sys
 
     if "--sse" in sys.argv:
+        logger.info("Running in SSE mode on %s:%d", config.SERVER_HOST, config.SERVER_PORT)
         app = sse_run(mcp)
         import uvicorn
         uvicorn.run(app, host=config.SERVER_HOST, port=config.SERVER_PORT)
 
     else:
+        logger.info("Running in stdio mode")
         import asyncio
         asyncio.run(stdio_run(mcp))
