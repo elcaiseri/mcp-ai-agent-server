@@ -6,7 +6,7 @@ from typing import Dict, Any, Union
 class CalculatorTool:
     """Tool for performing calculations."""
     
-    def calculate(self, expression: str) -> Dict[str, Any]:
+    async def calculate(self, expression: str) -> Dict[str, Any]:
         """
         Evaluate a mathematical expression safely.
         
@@ -63,7 +63,7 @@ class CalculatorTool:
                 "error": f"Error calculating: {str(e)}"
             }
     
-    def convert_units(
+    async def convert_units(
         self, 
         value: float, 
         from_unit: str, 
