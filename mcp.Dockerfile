@@ -22,6 +22,6 @@ RUN uv sync --no-cache
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Expose port for MCP inspector
-EXPOSE 6274
+EXPOSE 3001
 
-CMD ["uv", "run", "python", "-m", "src.server"]
+CMD ["uv", "run", "python", "-m", "src.server", "--sse"]

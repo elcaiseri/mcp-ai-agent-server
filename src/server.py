@@ -2,6 +2,7 @@
 import asyncio
 import json
 from typing import Any, Sequence
+from fastapi import FastAPI
 from mcp.server import Server
 from mcp.types import Tool, TextContent, ImageContent, EmbeddedResource
 from pydantic import AnyUrl
@@ -16,10 +17,10 @@ from .tools.cli import cli_utils
 from .utils.config import config
 
 # Initialize MCP server
-app = Server("ai-agent-server")
+mcp = Server("ai-agent-server")
 print("MCP AI Agent Server initialized...")
 
-@app.list_tools()
+@mcp.list_tools()
 async def list_tools() -> list[Tool]:
     """List all available tools."""
     return [
@@ -243,7 +244,7 @@ tool2call = {
     "cli_utils": cli_utils.execute,
 }
 
-@app.call_tool()
+@mcp.call_tool()
 async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
     """Handle tool execution."""
     
@@ -269,23 +270,39 @@ async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | ImageCo
             )
         ]
 
-async def main():
-    """Run the MCP server."""
-    # Ensure directories exist
-    config.ensure_directories()
-    
-    # Validate configuration
-    config.validate()
-    
-    # Run server
+async def stdio_run():
+    """Run the MCP server with stdio."""
     from mcp.server.stdio import stdio_server
     
     async with stdio_server() as (read_stream, write_stream):
-        await app.run(
+        await mcp.run(
             read_stream,
             write_stream,
-            app.create_initialization_options()
+            mcp.create_initialization_options()
         )
 
+def sse_run():
+    """Run the MCP server with SSE."""
+    app = FastAPI(title="MCP AI Agent ASGI Server")
+
+    from .utils.sse_utils import sse_server
+    app.mount("/", sse_server(mcp))
+
+    @app.get("/health")
+    async def health():
+        return {"status": "MCP HEALTHY"}
+
+    import uvicorn
+    uvicorn.run(app, host=config.SERVER_HOST, port=config.SERVER_PORT)
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    # uv run python -m src.server --sse (unless stdio)
+    
+    config.ensure_directories() # Ensure directories exist
+    config.validate() # Validate configuration
+
+    import sys
+    if "--sse" in sys.argv:
+        sse_run()
+    else:
+        asyncio.run(stdio_run())

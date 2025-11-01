@@ -17,6 +17,8 @@ class Config:
     # Server Configuration
     SERVER_NAME = os.getenv("MCP_SERVER_NAME", "ai-agent-server")
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+    SERVER_HOST = os.getenv("SERVER_HOST", "0.0.0.0")
+    SERVER_PORT = int(os.getenv("SERVER_PORT", 3001))
     
     # Directories
     BASE_DIR = Path(__file__).parent.parent.parent
