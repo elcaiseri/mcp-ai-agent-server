@@ -25,17 +25,17 @@ class CLIUtilsTool:
     async def execute(
         self,
         command: str,
-        cwd: Optional[str] = None,
-        timeout: Optional[int] = None
+        cwd: str = ".",
+        timeout: int = 60
     ) -> Dict[str, Any]:
         """
         Execute any shell command with full freedom.
         
         Args:
-            command: Command to execute (any valid shell command)
-            cwd: Working directory (defaults to data directory)
-            timeout: Command timeout in seconds
-            
+            command (str): Command to execute (any valid shell command)
+            cwd (str, optional): Working directory (defaults to data directory)
+            timeout (int, optional): Command timeout in seconds
+
         Returns:
             Result dictionary with stdout, stderr, and return code
         """

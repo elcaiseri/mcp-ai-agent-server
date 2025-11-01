@@ -71,7 +71,12 @@ class CalculatorTool:
     ) -> Dict[str, Any]:
         """
         Convert between units.
-        
+
+        Args:
+            value: Numeric value to convert
+            from_unit: Unit to convert from
+            to_unit: Unit to convert to
+
         Supported conversions:
         - Temperature: celsius, fahrenheit, kelvin
         - Length: meter, kilometer, mile, foot, inch
