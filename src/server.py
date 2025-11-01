@@ -5,7 +5,6 @@ from fastapi import FastAPI
 from mcp.server import Server
 from mcp.types import Tool, TextContent, ImageContent, EmbeddedResource
 
-
 # Import tools
 from .tools.weather import weather_tool
 from .tools.news import news_tool
@@ -16,7 +15,6 @@ from .tools.cli import cli_utils
 from .utils.helper import func_to_tool
 
 # Initialize MCP server
-
 class MCPServer:
     """MCP AI Agent Server."""
     def __init__(self, tool2call: dict[str, Any]) -> Server:
@@ -87,6 +85,7 @@ def sse_run(mcp):
         return {"status": "MCP HEALTHY"}
 
     return app
+
 if __name__ == "__main__":
     # uv run python -m src.server --sse (unless stdio)
 
@@ -120,6 +119,7 @@ if __name__ == "__main__":
 
     config.ensure_directories() # Ensure directories exist
     config.validate() # Validate configuration
+    
     mcp = MCPServer(tool2call).server
 
     import sys
