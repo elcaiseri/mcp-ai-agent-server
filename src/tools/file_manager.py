@@ -25,12 +25,13 @@ class FileManagerTool:
         Create a new file with content.
         
         Args:
-            path: File path (relative to data directory or absolute)
+            path: File path (relative to data directory)
             content: File content
             
         Returns:
             Result dictionary
         """
+        
         try:
             file_path = self._resolve_path(path)
             file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -57,8 +58,8 @@ class FileManagerTool:
         Read file content.
         
         Args:
-            path: File path
-            
+            path: File path (relative to data directory)
+
         Returns:
             File content and metadata
         """
@@ -100,8 +101,8 @@ class FileManagerTool:
         Delete a file.
         
         Args:
-            path: File path
-            
+            path: File path (relative to data directory)
+
         Returns:
             Result dictionary
         """
@@ -139,7 +140,7 @@ class FileManagerTool:
         Search for files matching a pattern.
         
         Args:
-            directory: Directory to search (relative or absolute)
+            directory: Directory to search (relative to data directory)
             pattern: Glob pattern (e.g., "*.txt", "data_*")
             
         Returns:
@@ -187,7 +188,7 @@ class FileManagerTool:
         List contents of a directory.
         
         Args:
-            directory: Directory path
+            directory: Directory path (relative to data directory)
             
         Returns:
             Directory contents
