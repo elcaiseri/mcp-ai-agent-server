@@ -15,6 +15,8 @@ RUN npm install -g @modelcontextprotocol/inspector
 
 WORKDIR /app
 
+VOLUME [ "/app/WORKSPACE/" ]
+
 ADD . /app
 
 RUN uv sync --no-cache

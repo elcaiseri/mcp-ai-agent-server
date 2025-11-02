@@ -22,8 +22,8 @@ class Config:
     
     # Directories
     BASE_DIR = Path(__file__).parent.parent.parent
-    DATA_DIR = BASE_DIR / "mcp_data"
-    TEMP_DIR = BASE_DIR / "temp_files"
+    DATA_DIR = BASE_DIR / "WORKSPACE"
+    TEMP_DIR = BASE_DIR / "TEMP"
     
     @classmethod
     def ensure_directories(cls):
