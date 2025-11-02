@@ -228,4 +228,29 @@ class FileManagerTool:
                 "error": f"Error listing directory: {str(e)}"
             }
 
+    async def retrieve_current_working_directory(self) -> Dict[str, Any]:
+        """
+        Retrieve the current working directory used as the base data path.
+
+        This directory serves as the root location for all tools or operations that 
+        require file paths, relative directories, or working directory references.
+
+        Returns:
+            Result Working Directory Path dictionary
+        """
+        try:
+            return {
+                "success": True,
+                "path": str(self.base_dir),
+                "message": f"Working directory '{self.base_dir}' has been retrieved.",
+                "error": None
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "path": str(self.base_dir),
+                "message": None,
+                "error": f"Error retrieving working directory: {str(e)}"
+            }
+        
 file_manager = FileManagerTool()

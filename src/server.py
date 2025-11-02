@@ -118,6 +118,8 @@ if __name__ == "__main__":
         "delete_file": file_manager.delete_file,
         "search_files": file_manager.search_files,
         "list_directory": file_manager.list_directory,
+        "update_file": file_manager.update_file,
+        "retrieve_current_working_directory": file_manager.retrieve_current_working_directory,
         
         # Web tools
         "fetch_webpage": web_fetcher.fetch_webpage,
