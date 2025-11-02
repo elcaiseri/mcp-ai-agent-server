@@ -5,6 +5,7 @@ from typing import Any, Sequence
 from fastapi import FastAPI
 from mcp.server import Server
 from mcp.types import Tool, TextContent, ImageContent, EmbeddedResource
+from fastmcp.tools.tool import FunctionTool
 
 # Import tools
 from .tools.weather import weather_tool
@@ -39,9 +40,8 @@ class MCPServer:
             """List all available tools."""
             logger.debug("Listing available tools")
             return [
-                Tool(
-                    **func_to_tool(func, name)
-                ) for name, func in self.tool2call.items()
+                FunctionTool.from_function(func, name=name, output_schema=None).to_mcp_tool()
+                for name, func in self.tool2call.items()
             ]
 
         @self.server.call_tool()
