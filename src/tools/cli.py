@@ -29,11 +29,15 @@ class CLIUtilsTool:
         timeout: int = 60
     ) -> Dict[str, Any]:
         """
-        Execute any shell command with full freedom.
-        
+        Execute an arbitrary shell command with full control over execution context.
+
+        This method allows running simple commands (e.g., `ls`, `cat`, `echo`) as well as 
+        complex shell pipelines and redirections (e.g., `grep pattern file | sort > output.txt`).
+        It captures both standard output and standard error, and returns structured results.
+            
         Args:
             command (str): Command to execute (any valid shell command)
-            cwd (str, optional): Working directory (defaults to data directory)
+            cwd (str, optional): Relative Working directory (defaults to data directory)
             timeout (int, optional): Command timeout in seconds
 
         Returns:
