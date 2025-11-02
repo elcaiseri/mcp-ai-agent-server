@@ -14,7 +14,6 @@ from .tools.file_manager import file_manager
 from .tools.web_fetcher import web_fetcher
 from .tools.calculator import calculator
 from .tools.cli import cli_utils
-from .utils.helper import func_to_tool
 
 # Configure logging
 logging.basicConfig(
