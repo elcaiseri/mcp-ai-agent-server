@@ -21,8 +21,8 @@ class CLIUtilsTool:
         if not dir_path.is_absolute():
             dir_path = self.working_dir / dir_path
         return dir_path
-    
-    async def execute(
+
+    async def execute_command(
         self,
         command: str,
         cwd: str = ".",
@@ -30,8 +30,7 @@ class CLIUtilsTool:
     ) -> Dict[str, Any]:
         """
         Execute an arbitrary shell command with full control over execution context.
-
-        This method allows running simple commands (e.g., `ls`, `cat`, `echo`) as well as 
+        This method allows running simple commands (e.g., `ls`, `cat`, `echo`, `pwd`, `mv`) as well as 
         complex shell pipelines and redirections (e.g., `grep pattern file | sort > output.txt`).
         It captures both standard output and standard error, and returns structured results.
             

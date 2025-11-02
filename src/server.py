@@ -129,7 +129,7 @@ if __name__ == "__main__":
         "convert_units": calculator.convert_units,
 
         # CLI utilities
-        "cli_utils": cli_utils.execute,
+        "execute_command": cli_utils.execute_command,
     }
     
     from .utils.config import config
