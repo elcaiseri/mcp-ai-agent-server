@@ -231,7 +231,6 @@ class FileManagerTool:
     async def retrieve_current_working_directory(self) -> Dict[str, Any]:
         """
         Retrieve the current working directory used as the base data path.
-
         This directory serves as the root location for all tools or operations that 
         require file paths, relative directories, or working directory references.
 
