@@ -14,4 +14,4 @@ RUN uv sync --no-cache
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-CMD ["uv", "run", "python", "-m", "src.agent"]
+CMD ["uv", "run", "python", "-m", "src.client"]
