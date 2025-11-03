@@ -1,0 +1,16 @@
+{
+	"servers": {
+		"stdio-server": {
+			"type": "stdio",
+			"command": "uv",
+			"args": [
+				"run",
+				"python",
+				"-m",
+				"src.server"
+			],
+			"envFile": "${workspaceFolder}/.env"
+		},
+	},
+	"inputs": []
+}
