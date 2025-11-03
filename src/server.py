@@ -1,4 +1,5 @@
 """Main MCP server implementation."""
+import sys
 import json
 import logging
 from typing import Any, Sequence
@@ -16,6 +17,9 @@ from .tools.calculator import calculator
 from .tools.cli import cli_utils
 
 from .utils.config import config
+
+config.ensure_directories() # Ensure directories exist
+config.validate() # Validate configuration
 
 # Configure logging
 logging.disable(config.LOG_LEVEL)
@@ -70,34 +74,34 @@ class MCPServer:
                         text=json.dumps({"error": f"Error executing {name}: {str(e)}"}, indent=2)
                     )
                 ]
-            
-
-async def stdio_run(mcp):
-    """Run the MCP server with stdio."""
-    from mcp.server.stdio import stdio_server
     
-    logger.info("Starting MCP server with stdio transport")
-    async with stdio_server() as (read_stream, write_stream):
-        await mcp.run(
-            read_stream,
-            write_stream,
-            mcp.create_initialization_options()
-        )
+    async def stdio_run(self):
+        """Run the MCP server with stdio."""
+        from mcp.server.stdio import stdio_server
+        
+        logger.info("Starting MCP server with stdio transport")
+        async with stdio_server() as (read_stream, write_stream):
+            await self.server.run(
+                read_stream,
+                write_stream,
+                self.server.create_initialization_options()
+            )
 
-def sse_run(mcp):
-    """Run the MCP server with SSE."""
-    logger.info("Initializing MCP server with SSE transport")
-    app = FastAPI(title="MCP AI Agent ASGI Server")
+    def sse_run(self):
+        """Run the MCP server with SSE."""
+        logger.info("Initializing MCP server with SSE transport")
+        app = FastAPI(title="MCP AI Agent ASGI Server")
 
-    from .utils.sse_utils import sse_server
-    app.mount("/", sse_server(mcp))
+        from .utils.sse_utils import sse_server
+        app.mount("/", sse_server(self.server))
 
-    @app.get("/health")
-    async def health():
-        logger.debug("Health check requested")
-        return {"status": "MCP HEALTHY"}
-
-    return app
+        @app.get("/health")
+        async def health():
+            logger.debug("Health check requested")
+            return {"status": "MCP HEALTHY"}
+        
+        import uvicorn
+        uvicorn.run(app, host=config.SERVER_HOST, port=config.SERVER_PORT)
 
 if __name__ == "__main__":
     # uv run python -m src.server --sse (unless stdio)
@@ -129,22 +133,13 @@ if __name__ == "__main__":
         # CLI utilities
         "execute_command": cli_utils.execute_command,
     }
-    
-    logger.info("Starting MCP AI Agent Server")
-    config.ensure_directories() # Ensure directories exist
-    config.validate() # Validate configuration
-    
-    mcp = MCPServer(tool2call).server
 
-    import sys
+    mcp = MCPServer(tool2call)
 
     if "--sse" in sys.argv:
         logger.info("Running in SSE mode on %s:%d", config.SERVER_HOST, config.SERVER_PORT)
-        app = sse_run(mcp)
-        import uvicorn
-        uvicorn.run(app, host=config.SERVER_HOST, port=config.SERVER_PORT)
-
+        mcp.sse_run()
     else:
         logger.info("Running in stdio mode")
         import asyncio
-        asyncio.run(stdio_run(mcp))
+        asyncio.run(mcp.stdio_run())
