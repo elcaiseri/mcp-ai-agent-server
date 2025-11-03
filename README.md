@@ -26,7 +26,7 @@ Run as a standalone command-line agent for direct interaction and task execution
 4. **Web Fetcher**: Download and parse web content
 5. **Calculator**: Perform complex calculations
 6. **Search Tool**: Search files and data
-7. **AI Agent**: LangChain-powered reasoning and task execution
+7. **AI Agent**: LangChain MCP client powered reasoning and task execution
 
 ## 📦 Installation
 
@@ -101,11 +101,11 @@ Run the agent directly from the command line for interactive sessions.
 
 **Start the CLI agent:**
 ```bash
-uv run python -m src.agent
+uv run python -m src.client
 ```
 
 <p align="center">
-  <img src="assets/agent_cli.png" alt="AI Agent Chat Interface" width="600">
+  <img src="assets/agent_cli.png" alt="AI Agent MCP Client Chat Interface" width="600">
 </p>
 
 **Example interactions:**
@@ -116,7 +116,7 @@ uv run python -m src.agent
 > Search for all Python files in the current directory
 ```
 
-The CLI agent uses LangChain to:
+The CLI agent uses LangChain MCP Client to:
 - Understand natural language commands
 - Select appropriate tools automatically
 - Chain multiple operations together
@@ -169,14 +169,13 @@ execute_agent_task(task="Analyze the weather in Tokyo and write a report")
 mcp-ai-agent-server/
 ├── src/
 │   ├── server.py          # Main MCP server implementation
+│   ├── client.py          # Standalone CLI agent implementation
 │   ├── tools/             # Individual tool implementations
 │   │   ├── weather.py
 │   │   ├── news.py
 │   │   ├── file_manager.py
 │   │   ├── web_fetcher.py
 │   │   └── calculator.py
-│   ├── agent/             # LangChain agent setup
-│   │   └── ai_agent.py
 │   └── utils/             # Utilities
 │       └── config.py
 ├── tests/                 # Test suite
