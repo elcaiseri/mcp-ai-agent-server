@@ -15,8 +15,10 @@ from .tools.web_fetcher import web_fetcher
 from .tools.calculator import calculator
 from .tools.cli import cli_utils
 
+from .utils.config import config
+
 # Configure logging
-logging.disable(logging.CRITICAL)
+logging.disable(config.LOG_LEVEL)
 logger = logging.getLogger(__name__)
 
 # Initialize MCP server
@@ -128,8 +130,6 @@ if __name__ == "__main__":
         "execute_command": cli_utils.execute_command,
     }
     
-    from .utils.config import config
-
     logger.info("Starting MCP AI Agent Server")
     config.ensure_directories() # Ensure directories exist
     config.validate() # Validate configuration
