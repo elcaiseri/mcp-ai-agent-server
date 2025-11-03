@@ -15,6 +15,7 @@ from .tools.file_manager import file_manager
 from .tools.web_fetcher import web_fetcher
 from .tools.calculator import calculator
 from .tools.cli import cli_utils
+from .tools.memory import memory
 
 from .utils.config import config
 
@@ -132,6 +133,11 @@ if __name__ == "__main__":
 
         # CLI utilities
         "execute_command": cli_utils.execute_command,
+
+        # Memory management tools
+        "store_memory": memory.store_memory,
+        "forget_memory": memory.forget_memory,
+        "retrieve_memory": memory.retrieve_memory,
     }
 
     mcp = MCPServer(tool2call)

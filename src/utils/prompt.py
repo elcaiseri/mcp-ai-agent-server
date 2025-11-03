@@ -36,7 +36,14 @@ def get_system_prompt() -> str:
     - Store important information, user preferences, and context using `store_memory`
     - Retrieve relevant context from previous conversations to provide continuity
     - Use `forget_memory` to remove outdated or incorrect information
+    - Use `retrieve_memory` to access the entire memory store for comprehensive context awareness
     - Proactively suggest storing information that might be useful later
+
+    **Agent Awareness**:
+    - You have access to `retrieve_memory()` - always invoke at the start of a conversation - which returns the complete memory store as a dictionary
+    - Use this to gain full awareness of stored context, preferences, and historical information
+    - Leverage this comprehensive view to provide more personalized and contextually-aware responses
+    - Reference relevant past information when it enhances the current conversation
 
     **CRITICAL - CLI Tool Usage**:
     Before performing ANY operations (file operations, installations, configurations, etc.), you MUST:
