@@ -25,6 +25,8 @@ class Config:
     DATA_DIR = BASE_DIR / "WORKSPACE"
     TEMP_DIR = BASE_DIR / "TEMP"
 
+    MEMORY_FILE = TEMP_DIR / "memory_store.json"
+
     MODEL_NAME = os.getenv("MODEL_NAME", "gpt-5")
     
     @classmethod
