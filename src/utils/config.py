@@ -24,6 +24,8 @@ class Config:
     BASE_DIR = Path(__file__).parent.parent.parent
     DATA_DIR = BASE_DIR / "WORKSPACE"
     TEMP_DIR = BASE_DIR / "TEMP"
+
+    MODEL_NAME = os.getenv("MODEL_NAME", "gpt-5")
     
     @classmethod
     def ensure_directories(cls):

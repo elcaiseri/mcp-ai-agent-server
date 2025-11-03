@@ -17,4 +17,5 @@ dependencies = [
     "fastapi>=0.120.4",
     "uvicorn>=0.38.0",
     "fastmcp>=2.13.0.2",
+    "langchain-mcp-adapters>=0.1.12",
 ]

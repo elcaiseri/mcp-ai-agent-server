@@ -16,10 +16,7 @@ from .tools.calculator import calculator
 from .tools.cli import cli_utils
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.disable(logging.CRITICAL)
 logger = logging.getLogger(__name__)
 
 # Initialize MCP server
