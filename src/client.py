@@ -51,9 +51,6 @@ class AIAgentMCPClient:
         
         # Note: Call initialize() explicitly after construction
 
-    async def _create_tool_wrappers(self) -> List:
-        return await self.mcp_client.get_tools()
-
     async def _initialize_agent(self):
         """Initialize LangChain agent with tools."""
         if not config.OPENAI_API_KEY:
@@ -70,7 +67,7 @@ class AIAgentMCPClient:
             )
             
             # Create tool wrappers
-            self.tools = await self._create_tool_wrappers()
+            self.tools = await self.mcp_client.get_tools()
             
             # Enhanced system prompt
             system_prompt = get_system_prompt()
