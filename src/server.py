@@ -9,13 +9,13 @@ from mcp.types import Tool, TextContent, ImageContent, EmbeddedResource
 from fastmcp.tools.tool import FunctionTool
 
 # Import tools
-from .tools.weather import weather_tool
-from .tools.news import news_tool
-from .tools.file_manager import file_manager
-from .tools.web_fetcher import web_fetcher
-from .tools.calculator import calculator
-from .tools.cli import cli_utils
-from .tools.memory import memory
+from .tools.weather_tools import weather_tool
+from .tools.news_tools import news_tool
+from .tools.file_manager_tools import file_manager
+from .tools.web_fetcher_tools import web_fetcher
+from .tools.calculator_tools import calculator
+from .tools.cli_tools import cli_utils
+from .tools.memory_tools import memory
 
 from .utils.config import config
 
