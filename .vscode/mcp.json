@@ -11,6 +11,10 @@
 			],
 			"envFile": "${workspaceFolder}/.env"
 		},
+		// "sse-server": {
+		// 	"type": "sse",
+		// 	"url": "http://localhost:3001/sse"
+		// },
 	},
 	"inputs": []
 }
