@@ -91,7 +91,7 @@ class MCPServer:
             ]
 
         @self.server.read_resource()
-        async def read_resource(uri: AnyUrl) -> str:
+        async def read_resource(uri: AnyUrl) -> ReadResourceContents:
             """Read a resource by its URI."""
             logger.info("Reading resource: %s", uri)
             if str(uri) == f"memory://{config.MEMORY_FILE.name}":

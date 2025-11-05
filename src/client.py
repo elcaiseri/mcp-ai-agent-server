@@ -46,6 +46,7 @@ class AIAgentMCPClient:
         self.session_start_time = datetime.now(timezone.utc)
         
         self.tools = None
+        self.resources = None
         self.llm = None
         self.agent = None
         
@@ -65,9 +66,15 @@ class AIAgentMCPClient:
                 timeout=300,
                 openai_api_key=config.OPENAI_API_KEY
             )
-            
-            # Create tool wrappers
+
+            # Create tool and resource wrappers
             self.tools = await self.mcp_client.get_tools()
+            # Fetch resources from all servers concurrently
+            resources_per_server = await asyncio.gather(
+                *(self.mcp_client.get_resources(name) for name in self.mcp_client.connections.keys())
+            )
+            # Flatten the list of resources
+            self.resources = [item for sublist in resources_per_server for item in sublist]
             
             # Enhanced system prompt
             system_prompt = get_system_prompt()
