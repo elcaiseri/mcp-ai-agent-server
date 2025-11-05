@@ -5,7 +5,7 @@ import logging
 from typing import Any, Sequence
 from fastapi import FastAPI
 from mcp.server import Server
-from mcp.types import Resource, Tool, TextContent, ImageContent, EmbeddedResource
+from mcp.types import Resource, Tool, TextContent, ImageContent, EmbeddedResource, TextResourceContents
 from fastmcp.tools.tool import FunctionTool
 
 # Import tools
@@ -81,23 +81,30 @@ class MCPServer:
             logger.debug("Listing available resources")
             return [
                 Resource(
-                    uri="memory://retrieve",
-                    name="Retrieve Stored Memories",
+                    uri=f"memory://{config.MEMORY_FILE.name}",
+                    name="Agent Stored Memories",
                     description="Access to all user stored memories",
-                    mimeType="text/plain"
+                    mimeType="application/json"
                 )
             ]
 
         @self.server.read_resource()
-        async def read_resource(uri: str) -> str:
-            """Read a resource by URI."""
+        async def read_resource(uri: str) -> TextResourceContents:
+            """Read a resource by its URI."""
             logger.info("Reading resource: %s", uri)
-            if str(uri).startswith("memory"):
-                logger.debug("Loading memory resource")
-                return str(await memory.load_memory())
-            else:
-                logger.error("Unknown resource requested: %s", uri)
-                return f"Unknown resource: {uri}"
+            try:
+                # memory://memory_store.json
+                if str(uri).startswith("memory://"):
+                    logger.debug("Reading memory resource: %s", uri)
+                    if config.MEMORY_FILE.exists():
+                        text = await memory.load_memory()
+                        logger.info("Memory resource %s read successfully", uri)
+                        return json.dumps(text, indent=2)
+                    return json.dumps({"error": "Resource not found"}, indent=2)
+
+                return json.dumps({"error": f"Unknown resource: {uri}"}, indent=2)
+            except Exception as e:
+                return json.dumps({"error": str(e)}, indent=2)
 
     async def stdio_run(self):
         """Run the MCP server with stdio."""
