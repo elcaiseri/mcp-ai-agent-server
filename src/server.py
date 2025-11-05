@@ -6,7 +6,9 @@ from typing import Any, Sequence
 from fastapi import FastAPI
 from mcp.server import Server
 from mcp.types import Resource, Tool, TextContent, ImageContent, EmbeddedResource, TextResourceContents
+from mcp.server.lowlevel.helper_types import ReadResourceContents
 from fastmcp.tools.tool import FunctionTool
+from pydantic import AnyUrl
 
 # Import tools
 from .tools.weather_tools import weather_tool
@@ -89,22 +91,19 @@ class MCPServer:
             ]
 
         @self.server.read_resource()
-        async def read_resource(uri: str) -> TextResourceContents:
+        async def read_resource(uri: AnyUrl) -> str:
             """Read a resource by its URI."""
             logger.info("Reading resource: %s", uri)
-            try:
-                # memory://memory_store.json
-                if str(uri).startswith("memory://"):
-                    logger.debug("Reading memory resource: %s", uri)
-                    if config.MEMORY_FILE.exists():
-                        text = await memory.load_memory()
-                        logger.info("Memory resource %s read successfully", uri)
-                        return json.dumps(text, indent=2)
-                    return json.dumps({"error": "Resource not found"}, indent=2)
+            if str(uri) == f"memory://{config.MEMORY_FILE.name}":
+                logger.debug("Reading all memory resources")
+                text = await memory.load_memory()
+                logger.info("All memory resources read successfully")
+                return json.dumps(text, indent=2)
+        
+            raise ValueError("Resource not found")
 
-                return json.dumps({"error": f"Unknown resource: {uri}"}, indent=2)
-            except Exception as e:
-                return json.dumps({"error": str(e)}, indent=2)
+
+
 
     async def stdio_run(self):
         """Run the MCP server with stdio."""
