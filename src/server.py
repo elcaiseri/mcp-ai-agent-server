@@ -102,9 +102,6 @@ class MCPServer:
         
             raise ValueError("Resource not found")
 
-
-
-
     async def stdio_run(self):
         """Run the MCP server with stdio."""
         from mcp.server.stdio import stdio_server
@@ -166,7 +163,7 @@ if __name__ == "__main__":
         # Memory management tools
         "store_memory": memory.store_memory,
         "forget_memory": memory.forget_memory,
-        #"retrieve_memory": memory.retrieve_memory,
+        "retrieve_memory": memory.retrieve_memory,
     }
 
     mcp = MCPServer(tool2call)
