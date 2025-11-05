@@ -28,7 +28,7 @@ env/
 
 # UV
 .uv/
-uv.lock
+#uv.lock
 
 # Environment Variables
 .env

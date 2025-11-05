@@ -1,5 +1,4 @@
 FROM python:3.12-slim-trixie
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 RUN apt-get update \
     && apt-get install -y curl \
@@ -13,13 +12,15 @@ RUN node -v && npm -v && npx -v
 
 RUN npm install -g @modelcontextprotocol/inspector
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 WORKDIR /app
 
 VOLUME [ "/app/WORKSPACE/" ]
 
 ADD . /app
 
-RUN uv sync --no-cache
+RUN uv sync --locked
 
 ENV PATH="/app/.venv/bin:$PATH"
 
