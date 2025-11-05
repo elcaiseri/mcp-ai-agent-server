@@ -5,7 +5,7 @@ import logging
 from typing import Any, Sequence
 from fastapi import FastAPI
 from mcp.server import Server
-from mcp.types import Tool, TextContent, ImageContent, EmbeddedResource
+from mcp.types import Resource, Tool, TextContent, ImageContent, EmbeddedResource
 from fastmcp.tools.tool import FunctionTool
 
 # Import tools
@@ -75,7 +75,30 @@ class MCPServer:
                         text=json.dumps({"error": f"Error executing {name}: {str(e)}"}, indent=2)
                     )
                 ]
-    
+        @self.server.list_resources()
+        async def list_resources() -> list[Resource]:
+            """List all available resources."""
+            logger.debug("Listing available resources")
+            return [
+                Resource(
+                    uri="memory://retrieve",
+                    name="Retrieve Stored Memories",
+                    description="Access to all user stored memories",
+                    mimeType="text/plain"
+                )
+            ]
+
+        @self.server.read_resource()
+        async def read_resource(uri: str) -> str:
+            """Read a resource by URI."""
+            logger.info("Reading resource: %s", uri)
+            if str(uri).startswith("memory"):
+                logger.debug("Loading memory resource")
+                return str(await memory.load_memory())
+            else:
+                logger.error("Unknown resource requested: %s", uri)
+                return f"Unknown resource: {uri}"
+
     async def stdio_run(self):
         """Run the MCP server with stdio."""
         from mcp.server.stdio import stdio_server
@@ -137,7 +160,7 @@ if __name__ == "__main__":
         # Memory management tools
         "store_memory": memory.store_memory,
         "forget_memory": memory.forget_memory,
-        "retrieve_memory": memory.retrieve_memory,
+        #"retrieve_memory": memory.retrieve_memory,
     }
 
     mcp = MCPServer(tool2call)
