@@ -624,16 +624,57 @@ async def main():
 
     mcp_client = MultiServerMCPClient(
         {
-            "stdio-server": {
+            "command-server": {
                 "transport": "stdio",
                 "command": "uv",
                 "args": [
                     "run",
                     "python",
                     "-m",
-                    "src.server"
-                ],
-		    }
+                    "src.servers.command"
+                ]
+		    },
+            "file-manager-server": {
+                "transport": "stdio",
+                "command": "uv",
+                "args": [
+                    "run",
+                    "python",
+                    "-m",
+                    "src.servers.file_manager"
+                ]
+            },
+            "web-server": {
+                "transport": "stdio",
+                "command": "uv",
+                "args": [
+                    "run",
+                    "python",
+                    "-m",
+                    "src.servers.web"
+                ]
+            },
+            "memory-server": {
+                "transport": "stdio",
+                "command": "uv",
+                "args": [
+                    "run",
+                    "python",
+                    "-m",
+                    "src.servers.memory"
+                ]
+            },
+            "news-server": {
+                "transport": "stdio",
+                "command": "uv",
+                "args": [
+                    "run",
+                    "python",
+                    "-m",
+                    "src.servers.news"
+                ]
+            },
+            # add more servers as needed
         }
     )
 
