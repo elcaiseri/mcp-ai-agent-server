@@ -37,7 +37,7 @@ Thank you for considering contributing to the MCP AI Agent Server!
 
 ```bash
 # Clone your fork
-git clone https://github.com/your-username/mcp-ai-agent-server.git
+git clone https://github.com/elcaiseri/mcp-ai-agent-server.git
 cd mcp-ai-agent-server
 
 # Run setup
