@@ -1,4 +1,4 @@
-def get_system_prompt() -> str:    
+def get_system_prompt() -> str:
     return """You are an intelligent AI assistant specialized in helping users with a variety of tasks.
 
     Your capabilities include:

@@ -1,11 +1,12 @@
 """Main MCP server implementation."""
+
 import sys
 import json
 import logging
 from typing import Any, Sequence
 from fastapi import FastAPI
 from mcp.server import Server
-from mcp.types import Resource, Tool, TextContent, ImageContent, EmbeddedResource, TextResourceContents
+from mcp.types import Resource, Tool, TextContent, ImageContent, EmbeddedResource
 from mcp.server.lowlevel.helper_types import ReadResourceContents
 from fastmcp.tools.tool import FunctionTool
 from pydantic import AnyUrl
@@ -21,16 +22,18 @@ from .tools.memory_tools import memory
 
 from .utils.config import config
 
-config.ensure_directories() # Ensure directories exist
-config.validate() # Validate configuration
+config.ensure_directories()  # Ensure directories exist
+config.validate()  # Validate configuration
 
 # Configure logging
 logging.disable(config.LOG_LEVEL)
 logger = logging.getLogger(__name__)
 
+
 # Initialize MCP server
 class MCPServer:
     """MCP AI Agent Server."""
+
     def __init__(self, tool2call: dict[str, Any]) -> Server:
         self.server = Server("ai-agent-server")
         self.tool2call = tool2call
@@ -40,17 +43,22 @@ class MCPServer:
 
     def setup_tools(self):
         """Register tools with the MCP server."""
+
         @self.server.list_tools()
         async def list_tools() -> list[Tool]:
             """List all available tools."""
             logger.debug("Listing available tools")
             return [
-                FunctionTool.from_function(func, name=name, output_schema=None).to_mcp_tool()
+                FunctionTool.from_function(
+                    func, name=name, output_schema=None
+                ).to_mcp_tool()
                 for name, func in self.tool2call.items()
             ]
 
         @self.server.call_tool()
-        async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
+        async def call_tool(
+            name: str, arguments: Any
+        ) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
             """Handle tool execution."""
             logger.info("Executing tool: %s with arguments: %s", name, arguments)
             try:
@@ -64,8 +72,7 @@ class MCPServer:
                 # Format result as JSON
                 return [
                     TextContent(
-                        type="text",
-                        text=json.dumps(result, indent=2, default=str)
+                        type="text", text=json.dumps(result, indent=2, default=str)
                     )
                 ]
 
@@ -74,9 +81,12 @@ class MCPServer:
                 return [
                     TextContent(
                         type="text",
-                        text=json.dumps({"error": f"Error executing {name}: {str(e)}"}, indent=2)
+                        text=json.dumps(
+                            {"error": f"Error executing {name}: {str(e)}"}, indent=2
+                        ),
                     )
                 ]
+
         @self.server.list_resources()
         async def list_resources() -> list[Resource]:
             """List all available resources."""
@@ -86,7 +96,7 @@ class MCPServer:
                     uri=f"memory://{config.MEMORY_FILE.name}",
                     name="Agent Stored Memories",
                     description="Access to all user stored memories",
-                    mimeType="application/json"
+                    mimeType="application/json",
                 )
             ]
 
@@ -99,19 +109,17 @@ class MCPServer:
                 text = await memory.load_memory()
                 logger.info("All memory resources read successfully")
                 return json.dumps(text, indent=2)
-        
+
             raise ValueError("Resource not found")
 
     async def stdio_run(self):
         """Run the MCP server with stdio."""
         from mcp.server.stdio import stdio_server
-        
+
         logger.info("Starting MCP server with stdio transport")
         async with stdio_server() as (read_stream, write_stream):
             await self.server.run(
-                read_stream,
-                write_stream,
-                self.server.create_initialization_options()
+                read_stream, write_stream, self.server.create_initialization_options()
             )
 
     def sse_run(self):
@@ -120,15 +128,18 @@ class MCPServer:
         app = FastAPI(title="MCP AI Agent ASGI Server")
 
         from .utils.sse_utils import sse_server
+
         app.mount("/", sse_server(self.server))
 
         @app.get("/health")
         async def health():
             logger.debug("Health check requested")
             return {"status": "MCP HEALTHY"}
-        
+
         import uvicorn
+
         uvicorn.run(app, host=config.SERVER_HOST, port=config.SERVER_PORT)
+
 
 if __name__ == "__main__":
     # uv run python -m src.server --sse (unless stdio)
@@ -137,10 +148,8 @@ if __name__ == "__main__":
     tool2call = {
         # Weather tools
         "get_weather": weather_tool.get_weather,
-        
         # News tools
         "fetch_news": news_tool.fetch_news,
-        
         # File management tools
         "create_file": file_manager.create_file,
         "read_file": file_manager.read_file,
@@ -149,17 +158,13 @@ if __name__ == "__main__":
         "list_directory": file_manager.list_directory,
         "update_file": file_manager.update_file,
         "retrieve_current_working_directory": file_manager.retrieve_current_working_directory,
-        
         # Web tools
         "fetch_webpage": web_fetcher.fetch_webpage,
-        
         # Calculator tools
         "calculate": calculator.calculate,
         "convert_units": calculator.convert_units,
-
         # CLI utilities
         "execute_command": cli_utils.execute_command,
-
         # Memory management tools
         "store_memory": memory.store_memory,
         "forget_memory": memory.forget_memory,
@@ -169,9 +174,12 @@ if __name__ == "__main__":
     mcp = MCPServer(tool2call)
 
     if "--sse" in sys.argv:
-        logger.info("Running in SSE mode on %s:%d", config.SERVER_HOST, config.SERVER_PORT)
+        logger.info(
+            "Running in SSE mode on %s:%d", config.SERVER_HOST, config.SERVER_PORT
+        )
         mcp.sse_run()
     else:
         logger.info("Running in stdio mode")
         import asyncio
+
         asyncio.run(mcp.stdio_run())

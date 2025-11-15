@@ -3,6 +3,7 @@ from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
 from starlette.routing import Route
 
+
 def sse_server(mcp: Server) -> Starlette:
     """Create an SSE server for the given MCP server."""
     sse = SseServerTransport("/messages/")
@@ -13,11 +14,12 @@ def sse_server(mcp: Server) -> Starlette:
             self.mcp = mcp
 
         async def __call__(self, scope, receive, send):
-            async with self.sse.connect_sse(scope, receive, send) as (read_stream, write_stream):
+            async with self.sse.connect_sse(scope, receive, send) as (
+                read_stream,
+                write_stream,
+            ):
                 await self.mcp.run(
-                    read_stream,
-                    write_stream,
-                    self.mcp.create_initialization_options()
+                    read_stream, write_stream, self.mcp.create_initialization_options()
                 )
 
     class HandleMessages:
@@ -29,7 +31,7 @@ def sse_server(mcp: Server) -> Starlette:
 
     routes = [
         Route("/sse", endpoint=HandleSSE(sse, mcp), methods=["GET"]),
-        Route("/messages", endpoint=HandleMessages(sse), methods=["POST"])
+        Route("/messages", endpoint=HandleMessages(sse), methods=["POST"]),
     ]
 
     return Starlette(routes=routes)
