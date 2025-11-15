@@ -1,5 +1,5 @@
 """Tests for calculator tool."""
-from src.tools.calculator import calculator
+from src.tools.calculator_tools import calculator
 
 def test_basic_calculation():
     """Test basic arithmetic."""

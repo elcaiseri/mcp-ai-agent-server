@@ -2,7 +2,7 @@
 import pytest
 import tempfile
 from pathlib import Path
-from src.tools.file_manager import file_manager
+from src.tools.file_manager_tools import file_manager
 
 @pytest.mark.asyncio
 async def test_create_and_read_file():

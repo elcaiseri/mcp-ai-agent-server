@@ -6,11 +6,11 @@ import asyncio
 import json
 from src.agent.ai_agent import AIAgent
 from langchain.tools import Tool as LangChainTool
-from src.tools.weather import weather_tool
-from src.tools.news import news_tool
-from src.tools.file_manager import file_manager
-from src.tools.web_fetcher import web_fetcher
-from src.tools.calculator import calculator
+from src.tools.weather_tools import weather_tool
+from src.tools.news_tools import news_tool
+from src.tools.file_manager_tools import file_manager
+from src.tools.web_fetcher_tools import web_fetcher
+from src.tools.calculator_tools import calculator
 
 async def setup_agent():
     """Setup the AI agent with all tools."""

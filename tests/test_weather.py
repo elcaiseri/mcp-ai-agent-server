@@ -1,6 +1,6 @@
 """Tests for the weather tool."""
 import pytest
-from src.tools.weather import weather_tool
+from src.tools.weather_tools import weather_tool
 
 @pytest.mark.asyncio
 async def test_weather_without_api_key(monkeypatch):
