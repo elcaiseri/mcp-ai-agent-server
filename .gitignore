@@ -54,3 +54,8 @@ htmlcov/
 #temp_files/
 
 .DS_Store
+
+WORKSPACE/
+TEMP/
+
+*.ipynb
